@@ -1,8 +1,0 @@
-{
-    "targetGroupName":"测试群",
-    "timeInterval":60,
-    "telephone":"",
-    "email":"",
-    "password":"",
-    "str":"用户%s发布了新帖 %s，标签为%s。\npc端链接 %s\n mb端链接 %s"
-}
