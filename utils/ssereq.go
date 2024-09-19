@@ -51,3 +51,14 @@ func GetPostContentReq(id int, config *config.BotConfig) (*http.Request, error) 
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36")
 	return req, nil
 }
+
+func GetHeatPostsReq(config *config.BotConfig) (*http.Request, error) {
+	//get heat post
+	req, err := http.NewRequest("GET", "https://ssemarket.cn/api/auth/calculateHeat", nil)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return req, nil
+}

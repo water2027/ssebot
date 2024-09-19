@@ -4,19 +4,15 @@ import (
 	"fmt"
 	"log"
 	"sseBot/config"
-	"sseBot/sseapi"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/eatmoreapple/openwechat"
 	"github.com/skip2/go-qrcode"
+	"sseBot/sseapi"
+	"sseBot/variable"
 )
-
-var postId int = 394              //从这个id开始获取新的post
-var mu sync.Mutex
-var targetGroup *openwechat.Group //目标群组
 
 func keepAlive(bot *openwechat.Self) {
 	ticker := time.NewTicker(time.Minute * 1)
@@ -27,22 +23,9 @@ func keepAlive(bot *openwechat.Self) {
 }
 
 func heartBeat(bot *openwechat.Self) {
-	// 向文件传输助手发送消息，不要再关注公众号了
 	// 生成要发送的消息
 	outMessage := fmt.Sprintf("防微信自动退出登录[%d]", time.Now().Unix())
 	bot.SendTextToFriend(openwechat.NewFriendHelper(bot), outMessage)
-}
-
-func getPostId() *int {
-	mu.Lock()
-	defer mu.Unlock()
-	return &postId
-}
-
-func GetGroup() *openwechat.Group {
-	mu.Lock()
-	defer mu.Unlock()
-	return targetGroup
 }
 
 func consoleQrcode(uuid string) {
@@ -54,7 +37,7 @@ func consoleQrcode(uuid string) {
 	fmt.Println(q.ToSmallString(true))
 }
 
-func InitBot(config *config.BotConfig, intChannel chan int, postChannel chan sseapi.Post) {
+func InitBot(config *config.BotConfig, intChannel chan int, postChannel chan variable.Post) {
 	var err error
 	fmt.Println("startBot")
 	bot := openwechat.DefaultBot(openwechat.Desktop)
@@ -88,6 +71,11 @@ func InitBot(config *config.BotConfig, intChannel chan int, postChannel chan sse
 				trimmedMessage := strings.TrimPrefix(content, "@机器人")
 				IDRecieved := strings.Split(trimmedMessage, " ")[0]
 				cleanedInput := strings.ReplaceAll(IDRecieved, "\u2005", "")
+				log.Println(cleanedInput == "热点")
+				if cleanedInput == "热点" {
+					sseapi.GetHeatPosts(postChannel, config)
+					return
+				}
 				ID, err := strconv.Atoi(cleanedInput)
 				log.Println(ID)
 				if err != nil {
@@ -117,7 +105,9 @@ func InitBot(config *config.BotConfig, intChannel chan int, postChannel chan sse
 		intChannel <- 1
 		return
 	}
-	targetGroup = groups.GetByNickName(config.TargetGroupName)
+	target := groups.GetByNickName(config.TargetGroupName)
+	variable.GroupInit(target)
+	targetGroup := variable.GetGroup()
 	if targetGroup == nil {
 		log.Println("groupNotFound")
 		intChannel <- 1
@@ -139,22 +129,17 @@ func InitBot(config *config.BotConfig, intChannel chan int, postChannel chan sse
 	}
 }
 
-func sendPost(postChannel chan sseapi.Post, config *config.BotConfig) {
+func sendPost(postChannel chan variable.Post, config *config.BotConfig) {
 	str := config.Str
-	id := getPostId()
 	for post := range postChannel {
-		if post.PostID > *id {
-			target := GetGroup()
-			urlmb := fmt.Sprintf("https://ssemarket.cn/mb/#/postDetails?id=%d", post.PostID)
-			msg := fmt.Sprintf(str, post.Title, urlmb)
-			log.Println(msg)
-			_, err := target.SendText(msg)
-			if err != nil {
-				log.Println(err)
-			}
-			*id = post.PostID
+		target := variable.GetGroup()
+		urlmb := fmt.Sprintf("https://ssemarket.cn/mb/#/postDetails?id=%d", post.PostID)
+		msg := fmt.Sprintf(str, post.Title, urlmb)
+		log.Println(msg)
+		_, err := target.SendText(msg)
+		if err != nil {
+			log.Println(err)
 		}
 
 	}
-
 }

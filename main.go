@@ -1,9 +1,10 @@
 package main
 
 import (
+	"sseBot/bot"
 	"sseBot/config"
 	"sseBot/sseapi"
-	"sseBot/bot"
+	"sseBot/variable"
 
 	"fmt"
 	"log"
@@ -25,7 +26,7 @@ func main() {
 	config := config.GetConfig()
 	initLog()
 	intChannel := make(chan int)
-	postChannel := make(chan sseapi.Post)	
+	postChannel := make(chan variable.Post)	
 	go bot.InitBot(&config, intChannel,postChannel)
 
 	ticker := time.NewTicker(time.Duration(config.TimeInterval) * time.Minute)
@@ -37,5 +38,4 @@ func main() {
 			sseapi.GetPosts(postChannel, &config)
 		}
 	}
-
 }

@@ -2,35 +2,16 @@ package sseapi
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"sort"
-	"io"
 	"sseBot/config"
 	"sseBot/utils"
+	"sseBot/variable"
 )
 
-type Post struct {
-	PostID        int    `json:"PostID"`
-	UserName      string `json:"UserName"`
-	UserScore     int    `json:"UserScore"`
-	UserTelephone string `json:"UserTelephone"`
-	UserAvatar    string `json:"UserAvatar"`
-	UserIdentity  string `json:"UserIdentity"`
-	Title         string `json:"Title"`
-	Content       string `json:"Content"`
-	Like          int    `json:"Like"`
-	Comment       int    `json:"Comment"`
-	Browse        int    `json:"Browse"`
-	Heat          int    `json:"Heat"`
-	PostTime      string `json:"PostTime"`
-	IsSaved       bool   `json:"IsSaved"`
-	IsLiked       bool   `json:"IsLiked"`
-	Photos        string `json:"Photos"`
-	Tag           string `json:"Tag"`
-}
-
-func GetPosts(postChannel chan Post, config *config.BotConfig) {
+func GetPosts(postChannel chan variable.Post, config *config.BotConfig) {
 	client := &http.Client{}
 	loginReq, err := utils.LoginSSEReq(config)
 	if err != nil {
@@ -57,7 +38,7 @@ func GetPosts(postChannel chan Post, config *config.BotConfig) {
 	}
 	defer resp.Body.Close()
 
-	var posts []Post
+	var posts []variable.Post
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println(err)
@@ -68,46 +49,81 @@ func GetPosts(postChannel chan Post, config *config.BotConfig) {
 	sort.Slice(posts, func(i, j int) bool {
 		return posts[i].PostID < posts[j].PostID
 	})
+	id := variable.GetPostId()
 	for _, post := range posts {
-		postChannel <- post
+		if post.PostID > *id {
+			postChannel <- post
+			*id = post.PostID
+		}
 	}
 }
 
-func GetPostContent(id int, config *config.BotConfig) (Post, error) {
+func GetPostContent(id int, config *config.BotConfig) (variable.Post, error) {
 	client := &http.Client{}
 	loginReq, err := utils.LoginSSEReq(config)
 	if err != nil {
 		log.Println(err)
-		return Post{}, err
+		return variable.Post{}, err
 	}
 	req, err := utils.GetPostContentReq(id, config)
 	if err != nil {
 		log.Println(err)
-		return Post{}, err
+		return variable.Post{}, err
 	}
 
 	_, err = client.Do(loginReq)
 	if err != nil {
 		log.Println(err)
-		return Post{}, err
+		return variable.Post{}, err
 	}
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
-		return Post{}, err
+		return variable.Post{}, err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println(err)
-		return Post{}, err
+		return variable.Post{}, err
 	}
-	var post Post
+	var post variable.Post
 	err = json.Unmarshal(body, &post)
 	if err != nil {
 		log.Println(err)
-		return Post{}, err
+		return variable.Post{}, err
 	}
 	return post, nil
+}
+
+func GetHeatPosts(postChannel chan variable.Post, config *config.BotConfig) {
+	client := &http.Client{}
+	loginReq, err := utils.LoginSSEReq(config)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	req, err := utils.GetHeatPostsReq(config)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	client.Do(loginReq)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer resp.Body.Close()
+	var posts []variable.Post
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	json.Unmarshal(body, &posts)
+	for _, post := range posts {
+		postChannel <- post
+	}
 }
