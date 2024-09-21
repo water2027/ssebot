@@ -9,6 +9,7 @@ import (
 	"sseBot/config"
 	"sseBot/utils"
 	"sseBot/variable"
+	"strings"
 )
 
 func GetPosts(postChannel chan variable.Post, config *config.BotConfig) {
@@ -51,7 +52,8 @@ func GetPosts(postChannel chan variable.Post, config *config.BotConfig) {
 	})
 	id := variable.GetPostId()
 	for _, post := range posts {
-		if post.PostID > *id {
+		//如果post.Title以test开头，就不放入postChannel
+		if post.PostID > *id&&!strings.HasPrefix(post.Title, "test") {
 			postChannel <- post
 			*id = post.PostID
 		}

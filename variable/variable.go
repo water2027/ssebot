@@ -25,7 +25,7 @@ type Post struct {
 	Tag           string `json:"Tag"`
 }
 
-var postId int = 394  //从这个id开始获取新的post
+var postId int = 425  //从这个id开始获取新的post
 var mu sync.Mutex
 var targetGroup *openwechat.Group //目标群组
 
