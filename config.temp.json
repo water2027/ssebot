@@ -1,8 +1,9 @@
 {
-    "targetGroupName":"测试群",
+    "targetGroupName1":"测试群1",
+    "targetGroupName2":"测试群2",
     "timeInterval":1,
     "telephone":"",
     "email":"",
     "password":"",
-    "str":"帖子 %s。\n mb端链接 %s"
+    "str":"帖子%s\n链接%s"
 }

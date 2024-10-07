@@ -9,7 +9,8 @@ import (
 )
 
 type BotConfig struct {
-	TargetGroupName string `json:"targetGroupName"`
+	TargetGroupName1 string `json:"targetGroupName1"`
+	TargetGroupName2 string `json:"targetGroupName2"`
 	TimeInterval    int    `json:"timeInterval"`
 	Telephone       string `json:"telephone"`
 	Email           string `json:"email"`

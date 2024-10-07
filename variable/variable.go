@@ -25,14 +25,16 @@ type Post struct {
 	Tag           string `json:"Tag"`
 }
 
-var postId int = 425  //从这个id开始获取新的post
+var postId int = 481  //从这个id开始获取新的post
 var mu sync.Mutex
-var targetGroup *openwechat.Group //目标群组
+var targetGroup1 *openwechat.Group //目标群组
+var targetGroup2 *openwechat.Group //目标群组
 
-func GroupInit(group *openwechat.Group) {
+func GroupInit(group1 *openwechat.Group, group2 *openwechat.Group) {
 	mu.Lock()
 	defer mu.Unlock()
-	targetGroup = group
+	targetGroup1 = group1
+	targetGroup2 = group2
 }
 
 func GetPostId() *int {
@@ -41,8 +43,14 @@ func GetPostId() *int {
 	return &postId
 }
 
-func GetGroup() *openwechat.Group {
+func GetGroup1() *openwechat.Group {
 	mu.Lock()
 	defer mu.Unlock()
-	return targetGroup
+	return targetGroup1
+}
+
+func GetGroup2() *openwechat.Group {
+	mu.Lock()
+	defer mu.Unlock()
+	return targetGroup2
 }

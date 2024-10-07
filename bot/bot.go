@@ -63,7 +63,7 @@ func InitBot(config *config.BotConfig, intChannel chan int, postChannel chan var
 	// }
 
 	bot.MessageHandler = func(msg *openwechat.Message) {
-		log.Println(msg, msg.IsSendByGroup())
+		log.Println(msg.Content, msg.IsSendByGroup())
 		if msg.IsSendByGroup() {
 			content := msg.Content
 			if strings.HasPrefix(content, "@机器人") {
@@ -105,15 +105,28 @@ func InitBot(config *config.BotConfig, intChannel chan int, postChannel chan var
 		intChannel <- 1
 		return
 	}
-	target := groups.GetByNickName(config.TargetGroupName)
-	variable.GroupInit(target)
-	targetGroup := variable.GetGroup()
-	if targetGroup == nil {
+	target1 := groups.GetByNickName(config.TargetGroupName1)
+	target2 := groups.GetByNickName(config.TargetGroupName2)
+	variable.GroupInit(target1, target2)
+	targetGroup1 := variable.GetGroup1()
+	if targetGroup1 == nil {
 		log.Println("groupNotFound")
 		intChannel <- 1
 		return
 	}
-	_, err = targetGroup.SendText("hello")
+	_, err = targetGroup1.SendText("hello")
+	if err != nil {
+		log.Println(err)
+		intChannel <- 1
+		return
+	}
+	targetGroup2 := variable.GetGroup2()
+	if targetGroup2 == nil {
+		log.Println("groupNotFound")
+		intChannel <- 1
+		return
+	}
+	_, err = targetGroup2.SendText("hello")
 	if err != nil {
 		log.Println(err)
 		intChannel <- 1
@@ -132,14 +145,18 @@ func InitBot(config *config.BotConfig, intChannel chan int, postChannel chan var
 func sendPost(postChannel chan variable.Post, config *config.BotConfig) {
 	str := config.Str
 	for post := range postChannel {
-		target := variable.GetGroup()
-		urlmb := fmt.Sprintf("https://ssemarket.cn/mb/#/postDetails?id=%d", post.PostID)
-		msg := fmt.Sprintf(str, post.Title, urlmb)
+		target1 := variable.GetGroup1()
+		target2 := variable.GetGroup2()
+		url := fmt.Sprintf("https://ssemarket.cn/redirect?id=%d", post.PostID)
+		msg := fmt.Sprintf(str, post.Title, url)
 		log.Println(msg)
-		_, err := target.SendText(msg)
+		_, err := target1.SendText(msg)
 		if err != nil {
 			log.Println(err)
 		}
-
+		_, err = target2.SendText(msg)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
