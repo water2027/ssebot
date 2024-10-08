@@ -147,7 +147,7 @@ func sendPost(postChannel chan variable.Post, config *config.BotConfig) {
 	for post := range postChannel {
 		target1 := variable.GetGroup1()
 		target2 := variable.GetGroup2()
-		url := fmt.Sprintf("https://ssemarket.cn/redirect?id=%d", post.PostID)
+		url := fmt.Sprintf("https://ssemarket.cn/new/postdetail/%d", post.PostID)
 		msg := fmt.Sprintf(str, post.Title, url)
 		log.Println(msg)
 		_, err := target1.SendText(msg)
