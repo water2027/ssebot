@@ -22,7 +22,7 @@ var BotConfig Config
 var NowNum = 0
 
 func InitConfig() {
-	file, err := os.Open("config.json")
+	file, err := os.Open("config.yaml")
 	if err != nil {
 		log.Println(err)
 		return
