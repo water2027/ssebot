@@ -1,0 +1,7 @@
+webhook: webhook_url
+template_str: str
+time_interval: 1
+telephone: 123456
+email: example@example.com
+password: xxx
+startNum: 1234
