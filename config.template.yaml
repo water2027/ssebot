@@ -1,7 +1,7 @@
-webhook: webhook_url
-template_str: str
-time_interval: 1
-telephone: 123456
-email: example@example.com
-password: xxx
-startNum: 1234
+webhook: webhook_url # 企微群机器人的webhook地址
+template_str: str # 模板字符串，第一个参数是标题，第二个是帖子id
+time_interval: 1 # 每隔多少分钟爬取一次
+telephone: 123456 # 软工集市用户手机号
+email: example@example.com # 软工集市用户邮箱
+password: xxx # 软工集市用户密码（加密过的）
+startNum: 1234 # 从哪个地方开始发送帖子
