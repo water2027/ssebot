@@ -27,7 +27,7 @@ func NewPostChan(channel chan sseapi.Post) *PostChan {
 }
 
 func (pc *PostChan) Get(ctx context.Context) error {
-	ticker := time.NewTicker(time.Duration(config.BotConfig.TimeInterval) * time.Minute)
+	ticker := time.NewTicker(time.Duration(config.BotConfig.TimeInterval) * time.Second)
 	for {
 		select {
 		case <-ctx.Done():
